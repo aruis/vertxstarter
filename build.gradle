@@ -33,6 +33,9 @@ dependencies {
 
   implementation "io.vertx:vertx-core:$vertxVersion"
 
+  compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+  compile group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.25'
+
   testImplementation "io.vertx:vertx-junit5:$vertxVersion"
   testRuntime("org.junit.jupiter:junit-jupiter-engine:$junitJupiterEngineVersion")
 }
