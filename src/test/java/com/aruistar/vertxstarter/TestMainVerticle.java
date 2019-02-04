@@ -1,6 +1,11 @@
 package com.aruistar.vertxstarter;
 
+import com.sun.tools.javac.util.List;
+import groovy.sql.Sql;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.client.HttpResponse;
+import io.vertx.ext.web.client.WebClient;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -9,8 +14,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.math.BigDecimal;
+import java.sql.SQLException;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(VertxExtension.class)
@@ -32,6 +41,35 @@ public class TestMainVerticle {
         testContext.completeNow();
       });
     }));
+  }
+
+  @Test
+  @DisplayName("post /score")
+  @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
+  void postScore(Vertx vertx, VertxTestContext testContext) throws Throwable {
+    int score = new Random().nextInt(100);
+    JsonObject body = new JsonObject()
+      .put("v_name", "lilei")
+      .put("n_score", score)
+      .put("v_lesson", "语文");
+
+    Sql db = Sql.newInstance("jdbc:postgresql://localhost:5432/studypg", "postgres", "", "org.postgresql.Driver");
+
+    WebClient client = WebClient.create(vertx);
+    client.post(8080, "127.0.0.1", "/score")
+      .sendJsonObject(body, ar -> {
+        assertTrue(ar.succeeded());
+        HttpResponse response = ar.result();
+        assertEquals(response.statusCode(), 200);
+        String id = response.bodyAsString();
+        try {
+          BigDecimal scoreInRow = (BigDecimal) db.firstRow("select n_score from edu_score where id = ?;", List.of(id)).get("n_score");
+          assertEquals(scoreInRow.floatValue(), score);
+        } catch (SQLException e) {
+          e.printStackTrace();
+        }
+        testContext.completeNow();
+      });
   }
 
 }

@@ -38,6 +38,10 @@ dependencies {
 
   testImplementation "io.vertx:vertx-junit5:$vertxVersion"
   testRuntime("org.junit.jupiter:junit-jupiter-engine:$junitJupiterEngineVersion")
+
+  testRuntime "io.vertx:vertx-web-client:$vertxVersion"
+  testRuntime "org.codehaus.groovy:groovy-sql:2.5.5"
+  testRuntime group: 'org.postgresql', name: 'postgresql', version: '42.2.5'
 }
 
 
