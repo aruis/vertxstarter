@@ -32,6 +32,9 @@ def doOnChange = 'gradle classes'
 dependencies {
 
   implementation "io.vertx:vertx-core:$vertxVersion"
+  implementation "io.vertx:vertx-web:$vertxVersion"
+
+  compile 'io.reactiverse:reactive-pg-client:0.11.2'
 
   compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
   compile group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.25'
