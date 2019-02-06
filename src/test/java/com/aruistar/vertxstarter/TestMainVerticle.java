@@ -2,6 +2,7 @@ package com.aruistar.vertxstarter;
 
 import com.sun.tools.javac.util.List;
 import groovy.sql.Sql;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpResponse;
@@ -9,11 +10,14 @@ import io.vertx.ext.web.client.WebClient;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Random;
@@ -26,8 +30,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class TestMainVerticle {
 
   @BeforeEach
-  void deploy_verticle(Vertx vertx, VertxTestContext testContext) {
-    vertx.deployVerticle(new MainVerticle(), testContext.succeeding(id -> testContext.completeNow()));
+  void deploy_verticle(Vertx vertx, VertxTestContext testContext) throws IOException {
+    DeploymentOptions options = new DeploymentOptions();
+    File configFile = new File("/Users/liurui/Downloads/vertxstarter/src/main/resources/config.json");
+    options.setConfig(new JsonObject(ResourceGroovyMethods.getText(configFile)));
+    vertx.deployVerticle(new MainVerticle(), options, testContext.succeeding(id -> testContext.completeNow()));
   }
 
   @Test
