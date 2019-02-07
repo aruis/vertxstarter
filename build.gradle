@@ -34,17 +34,10 @@ dependencies {
   implementation "io.vertx:vertx-core:$vertxVersion"
   implementation "io.vertx:vertx-web:$vertxVersion"
 
-  compile 'io.reactiverse:reactive-pg-client:0.11.2'
 
   compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
   compile group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.25'
 
-  testImplementation "io.vertx:vertx-junit5:$vertxVersion"
-  testRuntime("org.junit.jupiter:junit-jupiter-engine:$junitJupiterEngineVersion")
-
-  testRuntime "io.vertx:vertx-web-client:$vertxVersion"
-  testRuntime "org.codehaus.groovy:groovy-sql:2.5.5"
-  testRuntime group: 'org.postgresql', name: 'postgresql', version: '42.2.5'
 }
 
 
@@ -66,7 +59,7 @@ test {
 }
 
 run {
-  args = ['run', mainVerticleName, "--redeploy=$watchForChange", "--launcher-class=$mainClassName", "--on-redeploy=$doOnChange"]
+  args = ['run', mainVerticleName]
 }
 
 task wrapper(type: Wrapper) {
