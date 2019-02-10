@@ -10,14 +10,32 @@ class SomeWorker extends AbstractVerticle {
 
   @Override
   void start() throws Exception {
-    vertx.setPeriodic(1000, {
+
+    println Vertx.currentContext().hashCode()
+
+    vertx.runOnContext({
+      log.info("runOnContext")
+    })
+
+    vertx.eventBus().consumer("test", {
       i++
       log.info(i + "")
+      println Vertx.currentContext().hashCode()
     })
+
+
   }
 }
 
 def vertx = Vertx.vertx()
-vertx.deployVerticle("SomeWorker", new DeploymentOptions().setWorker(true).setWorkerPoolSize(10))
+vertx.deployVerticle("SomeWorker", new DeploymentOptions().setWorker(true)
+  .setInstances(1)
+  .setWorkerPoolSize(5))
+
+
+vertx.setPeriodic(5000, {
+//  println Vertx.currentContext().hashCode()
+  vertx.eventBus().publish("test", "test")
+})
 
 
