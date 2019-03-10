@@ -3,39 +3,33 @@ import io.vertx.core.AbstractVerticle
 import io.vertx.core.DeploymentOptions
 import io.vertx.core.Vertx
 
-
 @Slf4j
-class SomeWorker extends AbstractVerticle {
+class SomeVerticle extends AbstractVerticle {
   def i = 0
 
   @Override
   void start() throws Exception {
 
-    println Vertx.currentContext().hashCode()
-
-    vertx.runOnContext({
-      log.info("runOnContext")
-    })
-
-    vertx.eventBus().consumer("test", {
+    vertx.setPeriodic(1000, {
       i++
       log.info(i + "")
-      println Vertx.currentContext().hashCode()
     })
 
+    new Thread({
+      i++
+    }).start()
+
+    vertx.executeBlocking({
+
+    },false,{
+
+    })
 
   }
 }
 
 def vertx = Vertx.vertx()
-vertx.deployVerticle("SomeWorker", new DeploymentOptions().setWorker(true)
-  .setInstances(1)
-  .setWorkerPoolSize(5))
+vertx.deployVerticle("SomeVerticle",new DeploymentOptions().setWorker(true).setMultiThreaded(true))
 
-
-vertx.setPeriodic(5000, {
-//  println Vertx.currentContext().hashCode()
-  vertx.eventBus().publish("test", "test")
-})
 
 
