@@ -7,11 +7,10 @@
 plugins {
   id 'java'
   id 'application'
-  id 'com.github.johnrengelman.shadow' version '2.0.4'
+  id 'com.github.johnrengelman.shadow' version '5.2.0'
 }
 ext {
-  vertxVersion = '3.6.3'
-  junitJupiterEngineVersion = '5.2.0'
+  vertxVersion = '4.0.0'
 }
 
 repositories {
@@ -22,7 +21,6 @@ repositories {
 group = 'com.aruistar'
 version = '1.0.0-SNAPSHOT'
 
-sourceCompatibility = '1.8'
 mainClassName = 'io.vertx.core.Launcher'
 
 def mainVerticleName = 'com.aruistar.vertxstarter.MainVerticle'
@@ -33,20 +31,22 @@ dependencies {
 
   implementation "io.vertx:vertx-core:$vertxVersion"
   implementation "io.vertx:vertx-web:$vertxVersion"
+  implementation "io.vertx:vertx-pg-client:$vertxVersion"
 
-  compile 'io.reactiverse:reactive-pg-client:0.11.2'
-
-  compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
-  compile group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.25'
+  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+  implementation group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.30'
 
   testImplementation "io.vertx:vertx-junit5:$vertxVersion"
-  testRuntime("org.junit.jupiter:junit-jupiter-engine:$junitJupiterEngineVersion")
 
-  testRuntime "io.vertx:vertx-web-client:$vertxVersion"
-  testRuntime "org.codehaus.groovy:groovy-sql:2.5.5"
-  testRuntime group: 'org.postgresql', name: 'postgresql', version: '42.2.5'
+  testImplementation "io.vertx:vertx-web-client:$vertxVersion"
+  testImplementation "org.codehaus.groovy:groovy-sql:3.0.7"
+  testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.2.5'
 }
 
+java {
+  sourceCompatibility = JavaVersion.VERSION_11
+  targetCompatibility = JavaVersion.VERSION_11
+}
 
 shadowJar {
   classifier = 'fat'
@@ -69,6 +69,3 @@ run {
   args = ['run', mainVerticleName, "--redeploy=$watchForChange", "--launcher-class=$mainClassName", "--on-redeploy=$doOnChange"]
 }
 
-task wrapper(type: Wrapper) {
-  gradleVersion = '4.6'
-}
