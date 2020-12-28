@@ -34,7 +34,7 @@ public class TestMainVerticle {
   @BeforeEach
   void deploy_verticle(Vertx vertx, VertxTestContext testContext) throws IOException {
     DeploymentOptions options = new DeploymentOptions();
-    File configFile = new File("/Users/liurui/Downloads/vertxstarter/src/main/resources/config.json");
+    File configFile = new File("/Users/liurui/develop/workspace-study/vertxstarter/src/main/resources/config.json");
     options.setConfig(new JsonObject(ResourceGroovyMethods.getText(configFile)));
     vertx.deployVerticle(new MainVerticle(), options, testContext.succeeding(id -> testContext.completeNow()));
   }
