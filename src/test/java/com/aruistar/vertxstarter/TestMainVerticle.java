@@ -1,8 +1,9 @@
 package com.aruistar.vertxstarter;
 
-import com.sun.tools.javac.util.List;
 import groovy.sql.Sql;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -34,13 +36,14 @@ public class TestMainVerticle {
   @DisplayName("Should start a Web Server on port 8080")
   @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
   void start_http_server(Vertx vertx, VertxTestContext testContext) throws Throwable {
-    vertx.createHttpClient().getNow(8080, "localhost", "/", response -> testContext.verify(() -> {
-      assertTrue(response.statusCode() == 200);
-      response.handler(body -> {
-        assertTrue(body.toString().contains("Hello from Vert.x!"));
+
+    vertx.createHttpClient().request(HttpMethod.GET, 8080, "localhost", "/")
+      .compose(req -> req.send().compose(HttpClientResponse::body))
+      .onComplete(testContext.succeeding(buffer -> testContext.verify(() -> {
+        assertTrue(buffer.toString().contains("Hello from Vert.x!"));
         testContext.completeNow();
-      });
-    }));
+      })));
+
   }
 
   @Test
@@ -53,7 +56,7 @@ public class TestMainVerticle {
       .put("n_score", score)
       .put("v_lesson", "语文");
 
-    Sql db = Sql.newInstance("jdbc:postgresql://localhost:5432/studypg", "postgres", "", "org.postgresql.Driver");
+    Sql db = Sql.newInstance("jdbc:postgresql://localhost:5432/studypg", "postgres", "muyuntage", "org.postgresql.Driver");
 
     WebClient client = WebClient.create(vertx);
     client.post(8080, "127.0.0.1", "/score")

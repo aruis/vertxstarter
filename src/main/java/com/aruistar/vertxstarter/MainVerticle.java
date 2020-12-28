@@ -1,15 +1,16 @@
 package com.aruistar.vertxstarter;
 
-import io.reactiverse.pgclient.PgClient;
-import io.reactiverse.pgclient.PgPool;
-import io.reactiverse.pgclient.PgPoolOptions;
-import io.reactiverse.pgclient.Tuple;
+
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.pgclient.PgConnectOptions;
+import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.PoolOptions;
+import io.vertx.sqlclient.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -21,24 +22,32 @@ public class MainVerticle extends AbstractVerticle {
     SLF4JBridgeHandler.install();
   }
 
-  private static Logger logger = LoggerFactory.getLogger(MainVerticle.class);
+  private static final Logger logger = LoggerFactory.getLogger(MainVerticle.class);
+
 
   @Override
-  public void start(Future<Void> startFuture) throws Exception {
+  public void start(Promise<Void> startPromise) throws Exception {
     logger.info("verticle start");
 
-    PgPoolOptions options = new PgPoolOptions()
+    PgConnectOptions connectOptions = new PgConnectOptions()
       .setPort(5432)
       .setHost("127.0.0.1")
       .setDatabase("studypg")
       .setUser("postgres")
-      .setPassword("secret")
+      .setPassword("muyuntage");
+
+    PoolOptions poolOptions = new PoolOptions()
       .setMaxSize(5);
 
-// Create the client pool
-    PgPool client = PgClient.pool(vertx, options);
+    PgPool client = PgPool.pool(vertx, connectOptions, poolOptions);
 
     Router router = Router.router(vertx);
+
+    router.get("/")
+      .handler(routingContext -> {
+        routingContext.response().putHeader("Context-Type", "text/plain")
+          .end("Hello from Vert.x!");
+      });
 
     router.post("/score")
       .handler(BodyHandler.create())
@@ -46,21 +55,21 @@ public class MainVerticle extends AbstractVerticle {
         HttpServerResponse response = routingContext.response();
         JsonObject json = routingContext.getBodyAsJson();
 
-        client.preparedQuery("insert into edu_score (v_lesson, n_score, v_name) values ($1,$2,$3) returning id;",
-          Tuple.of(json.getString("v_lesson"), json.getFloat("n_score"), json.getString("v_name")),
-          ar -> {
-            String id = ar.result().iterator().next().getString("id");
-            response.end(id);
-          });
+        client.preparedQuery("insert into edu_score (v_lesson, n_score, v_name) values ($1,$2,$3) returning id;")
+          .execute(Tuple.of(json.getString("v_lesson"), json.getFloat("n_score"), json.getString("v_name")),
+            ar -> {
+              String id = ar.result().iterator().next().getString("id");
+              response.end(id);
+            });
       });
 
     vertx.createHttpServer().requestHandler(router)
       .listen(8080, http -> {
         if (http.succeeded()) {
-          startFuture.complete();
+          startPromise.complete();
           System.out.println("HTTP server started on http://localhost:8080");
         } else {
-          startFuture.fail(http.cause());
+          startPromise.fail(http.cause());
         }
       });
   }

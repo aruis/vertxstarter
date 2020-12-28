@@ -1,6 +1,6 @@
 create table edu_score
 (
-	id varchar default uuid_generate_v4() not null
+	id varchar default gen_random_uuid() not null
 		constraint edu_score_pk
 			primary key,
 	v_lesson varchar,
